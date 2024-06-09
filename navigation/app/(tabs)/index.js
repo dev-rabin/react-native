@@ -1,46 +1,28 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../../screens/HomeScreen.js';
-import AboutScreen from '../../screens/AboutScreen.js';
-import { Pressable, StatusBar, Text } from 'react-native';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import DashboardScreen from "../../screens/DashboardScreen";
+const BottomNavigation = createBottomTabNavigator();
+import { Ionicons } from "@expo/vector-icons";
+import DashboardSettingsScreen from "../../screens/DashboardSettingsScreen";
 
-const Stack = createNativeStackNavigator();
-
-export default function App() {
-  return (
-    <>
-    <StatusBar barStyle="light-content" backgroundColor="purple"/>
-      <Stack.Navigator 
-        initialRouteName="Home" 
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "purple",
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          headerTitleAlign: "center",
-        }}
-      >
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen} 
-          options={{
-            headerRight: () => (
-              <Pressable onPress={() => alert("Menu is pressed!")}>
-                <Text style={{ color: "white", fontSize: 12 }}>Menu</Text>
-              </Pressable>
-            ),
-          }} 
-        />
-        <Stack.Screen 
-          name="About" 
-          component={AboutScreen} 
-          initialParams={{ name: "Guest" }} 
-        />
-      </Stack.Navigator>
-      </>
-  );
+export default function App () {
+    return (
+        <BottomNavigation.Navigator screenOptions={
+            {
+                tabBarLabelPosition : "below-icon",
+                tabBarShowLabel : true,
+                tabBarActiveTintColor : "red",
+                tabBarInactiveTintColor : "blue",
+            }
+        }>
+        <BottomNavigation.Screen name="Bottom Tab Dashboard" component={DashboardScreen} 
+        options={{
+            tabBarIcon : ({color}) => <Ionicons name="person" size={20} color="purple"/>,
+            tabBarBadge:2
+        }}/>
+        <BottomNavigation.Screen name="Bottom Tab Setttings" component={DashboardSettingsScreen} options={{
+            tabBarIcon : () => <Ionicons name="settings" size={20}
+            />
+        }} />
+        </BottomNavigation.Navigator>
+    )
 }
