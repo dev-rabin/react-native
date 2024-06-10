@@ -1,20 +1,61 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { fetchUserData, deleteAddress } from "../services/api_service";
+import { useEffect, useState } from "react";
 
 export default function UserProfile() {
+    const [userData, setUserData] = useState([]);
+
+    const fetchUser = async () => {
+        try {
+            const responseData = await fetchUserData();
+            console.log("user dashboard response data:", responseData);
+            setUserData(responseData);
+        } catch (error) {
+            console.error("Data fetching error!", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
+    const deleteAddressUser = async (address) => {
+        try {
+            const response = await deleteAddress(address);
+            if (response) {
+                console.log("Delete address successfully!");
+                alert("Address deleted successfully!");
+                fetchUser();
+            } else {
+                console.error("Delete address failed.");
+                alert("Failed to delete address. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error in address deletion:", error);
+            alert("An error occurred while deleting the address. Please try again later.");
+        }
+    };
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.upperContainer}>
                 <View style={styles.profileContainer}>
                     <View style={styles.voidContainer}></View>
-                    <View style={styles.userDetail}>
-                        <Ionicons style={styles.icon} name="person" size={70} />
-                        <Text style={styles.name} >Robin Mandhotia</Text>
-                        <Text>UID : 121112212</Text>
-                        <Text style={styles.about} >About</Text>
-                        <Text>Gender</Text>
-                        <Text style={styles.referral}>Referral ID : 454545454</Text>
-                    </View>
+                    {userData.length === 0 ? (
+                        <Text style={styles.noUserData}>No user data available</Text>
+                    ) : (
+                        userData.map((item, index) => (
+                            <View style={styles.userDetail} key={index}>
+                                <Ionicons style={styles.icon} name="person" size={70} />
+                                <Text style={styles.name}>{item.name}</Text>
+                                <Text>UID : {item.user_id}</Text>
+                                <Text style={styles.about}>{item.about}</Text>
+                                <Text>{item.gender}</Text>
+                                <Text style={styles.referral}>Referral ID : 454545454</Text>
+                            </View>
+                        ))
+                    )}
                 </View>
 
                 <View style={styles.horizontalContainers}>
@@ -26,7 +67,6 @@ export default function UserProfile() {
                         <Ionicons name="mail" color="#4e26a3" size={25} />
                         <Text style={styles.hText}>Text</Text>
                     </View>
-
                     <View style={styles.hContainer}>
                         <Ionicons name="share" color="#4e26a3" size={25} />
                         <Text style={styles.hText}>Share</Text>
@@ -44,14 +84,19 @@ export default function UserProfile() {
                     <Ionicons name="home" size={20} />
                     <Text style={styles.work}>Work</Text>
                 </View>
-                <View>
-                    <Text style={styles.workPara}>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, tenetur, ullam corporis itaque debitis omnis odio vel fugiat, dolores nobis ex fugit officiis nihil.</Text>
-                </View>
-
-                <View style={styles.editContainer}>
-                    <Text style={styles.edit}>Edit</Text>
-                    <Text style={styles.delete}>Delete</Text>
-                </View>
+                {userData.map((user, index) => (
+                    <View key={index}>
+                        <View>
+                            <Text style={styles.workPara}>{user.address}</Text>
+                        </View>
+                        <View style={styles.editContainer}>
+                            <Text style={styles.edit}>Edit</Text>
+                            <Pressable onPress={() => deleteAddressUser(user.address)}>
+                                <Text style={styles.delete}>Delete</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                ))}
             </View>
 
             <View style={styles.common}>
@@ -79,7 +124,6 @@ export default function UserProfile() {
                 </View>
             </View>
 
-            
             <View style={styles.common}>
                 <Text style={styles.common1} >My Vehicles</Text>
                 <Text style={styles.common2}>Add Vehicles</Text>
@@ -91,8 +135,6 @@ export default function UserProfile() {
                     <Text style={styles.itemsMemberDetail}>Car</Text>
                 </View>
             </View>
-
-
         </ScrollView>
     )
 }
@@ -201,7 +243,7 @@ const styles = StyleSheet.create({
         padding: 10,
         flexDirection: "row",
         alignItems: "center",
-        borderRadius : 12
+        borderRadius: 12
     },
     itemsMemberBox: {
         marginLeft: 10
@@ -213,4 +255,8 @@ const styles = StyleSheet.create({
     itemsMemberDetail: {
         color: 'grey'
     },
+    noUserData : {
+        color : "red",
+        alignSelf : "center"
+    }
 })

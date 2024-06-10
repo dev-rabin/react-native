@@ -1,7 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { fetchUserData } from "../services/api_service";
+import { useLayoutEffect, useState } from "react";
 
 export default function UserDashboard({ navigation }) {
+    const [userData, setUserData] = useState([]);
+    const fetchUser = async () => {
+        try {
+            const responseData = await fetchUserData();
+            console.log("user dashboard response data:", responseData);
+            setUserData(responseData);
+        } catch (error) {
+            console.error("Data fetching error!", error);
+        }
+    };
+    useLayoutEffect(() => {
+        fetchUser();
+    }, [])
+
     return (
         <View style={styles.container}>
             <View style={styles.profileContainer}>
@@ -9,21 +25,36 @@ export default function UserDashboard({ navigation }) {
                     <Ionicons name="person" color="white" size={25} />
                     <Ionicons name="book" color="white" size={25} />
                     <Ionicons name="menu" color="white" size={25} />
-                    <Ionicons name="settings" color="white" size={25} onPress={() => navigation.navigate("User Profile")} />
+                    <Ionicons
+                        name="settings"
+                        color="white"
+                        size={25}
+                        onPress={() => navigation.navigate("User Profile", { userDetails: userData })}
+                    />
+
                 </View>
 
             </View>
             <View style={styles.nameContainer}>
                 <Ionicons style={styles.profile} name="person" size={100} color="grey" />
                 <View style={styles.profileText}>
-                    <Text style={styles.nameText}>Robin MAndhotia</Text>
-                    <View style={styles.uidContainer}>
-                        <Text style={styles.uidText}>UID : 12111212 </Text>
-                        <View style={styles.locationContainer}>
-                            <Ionicons name="location" />
-                            <Text style={styles.locationText}>Location</Text>
-                        </View>
-                    </View>
+                    <FlatList data={userData}
+                        renderItem={({ item }) => {
+                            console.log("item flatlist : ", item)
+                            return (
+                                <>
+                                    <Text style={styles.nameText}>{item.name}</Text>
+                                    <View style={styles.uidContainer}>
+                                        <Text style={styles.uidText}>UID : {item.user_id} </Text>
+                                        <View style={styles.locationContainer}>
+                                            <Ionicons name="location" />
+                                            <Text style={styles.locationText}>{item.city}</Text>
+                                        </View>
+                                    </View>
+                                </>
+                            )
+                        }}
+                    />
                 </View>
             </View>
 
@@ -67,11 +98,11 @@ export default function UserDashboard({ navigation }) {
                     <Text style={styles.bottomText}>0</Text>
                 </View>
                 <View style={styles.bottomContainer}>
-                    <Text style={styles.bottomText}>Loyalty</Text>
+                    <Text style={styles.bottomText}>Following</Text>
                     <Text style={styles.bottomText}>0</Text>
                 </View>
                 <View style={styles.bottomContainer}>
-                    <Text style={styles.bottomText}>Loyalty</Text>
+                    <Text style={styles.bottomText}>Transactions</Text>
                     <Text style={styles.bottomText}>0</Text>
                 </View>
             </View>
@@ -107,7 +138,7 @@ const styles = StyleSheet.create({
     },
     profileText: {
         justifyContent: "center",
-        marginTop: 48,
+        marginTop: 58,
         marginLeft: 12
     },
     uidContainer: {
@@ -211,9 +242,11 @@ const styles = StyleSheet.create({
     },
     bottomContainer: {
         backgroundColor: "#4e26a3",
-        padding: 25,
         alignItems: "center",
-        borderRadius: 12
+        borderRadius: 12,
+        width : 100,
+        height : 75,
+        justifyContent : "center"
     },
     bottomText: {
         color: "white"
